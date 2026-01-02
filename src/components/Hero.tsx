@@ -4,29 +4,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles, Check } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useUtmParams } from "@/hooks/useUtmParams";
 import heroDashboard from "@/assets/hero-dashboard.png";
 
 export const Hero = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const utmParams = useUtmParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
+    const trimmedEmail = email.trim().toLowerCase();
+    
+    if (!trimmedEmail) {
       toast.error("Please enter your email address");
       return;
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail)) {
       toast.error("Please enter a valid email address");
       return;
     }
 
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+    const { error } = await supabase.from("waitlist_signups").insert({
+      email: trimmedEmail,
+      referral_url: utmParams.referralUrl,
+      utm_source: utmParams.utmSource,
+      utm_medium: utmParams.utmMedium,
+      utm_campaign: utmParams.utmCampaign,
+      utm_term: utmParams.utmTerm,
+      utm_content: utmParams.utmContent,
+    });
+
     setIsSubmitting(false);
+
+    if (error) {
+      if (error.code === "23505") {
+        toast.error("This email is already on the waitlist!");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+      return;
+    }
+
     toast.success("You're on the list! We'll notify you when we launch.");
     setEmail("");
   };
