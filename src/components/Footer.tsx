@@ -44,8 +44,8 @@ export const Footer = () => {
               <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
                 <Zap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-display font-bold text-lg text-foreground">
-                AdAutomation
+              <span className="font-display font-bold text-xl text-foreground">
+                Lima
               </span>
             </a>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-xs">
@@ -128,7 +128,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
-            © 2026 AdAutomation Platform. All rights reserved.
+            © 2026 Lima. All rights reserved.
           </p>
           <p className="text-muted-foreground text-sm">
             Built for local service businesses with ❤️
