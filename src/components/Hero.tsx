@@ -142,7 +142,7 @@ export const Hero = () => {
             <div className="relative rounded-xl overflow-hidden glass border border-border/30 shadow-2xl">
               <img
                 src={heroDashboard}
-                alt="AdAutomation Platform Dashboard - Track leads, manage widgets, and automate your advertising"
+                alt="Lima Dashboard - Track leads, manage widgets, and automate your advertising"
                 className="w-full h-auto"
               />
             </div>

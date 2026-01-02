@@ -45,8 +45,8 @@ export const Navbar = () => {
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300">
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-display font-bold text-lg text-foreground hidden sm:block">
-              AdAutomation
+            <span className="font-display font-bold text-xl text-foreground hidden sm:block">
+              Lima
             </span>
           </a>
 
