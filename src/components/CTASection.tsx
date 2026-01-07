@@ -136,10 +136,10 @@ export const CTASection = () => {
               className="w-full"
             >
               {isSubmitting ? (
-                "Joining..."
+                "Signing up..."
               ) : (
                 <>
-                  Join Waitlist
+                  Get Free Beta Access
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
