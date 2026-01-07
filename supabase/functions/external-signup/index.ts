@@ -21,59 +21,69 @@ const handler = async (req: Request): Promise<Response> => {
     const { name, email, inviteCode, plan = "free" }: ExternalSignupRequest = await req.json();
 
     if (!name || !email) {
-      return new Response(
-        JSON.stringify({ error: "Name and email are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Name and email are required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     if (!inviteCode) {
-      return new Response(
-        JSON.stringify({ error: "Invite code is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Invite code is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Verify invite code
     const betaInviteCode = Deno.env.get("BETA_INVITE_CODE");
     if (!betaInviteCode) {
       console.error("BETA_INVITE_CODE is not configured");
-      return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     if (inviteCode.trim() !== betaInviteCode.trim()) {
       console.log(`Invalid invite code attempt for: ${email}`);
-      return new Response(
-        JSON.stringify({ error: "Invalid invite code" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Invalid invite code" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const apiKey = Deno.env.get("EXTERNAL_SIGNUP_API_KEY");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY"); // ADD THIS
+
     if (!apiKey) {
       console.error("EXTERNAL_SIGNUP_API_KEY is not configured");
-      return new Response(
-        JSON.stringify({ error: "Server configuration error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!anonKey) {
+      // ADD THIS
+      console.error("SUPABASE_ANON_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Server configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     console.log(`Calling external signup API for: ${email}`);
 
-    const response = await fetch(
-      "https://tnxdhrjfpmrvajvlejjv.supabase.co/functions/v1/external-signup",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({ name, email, plan }),
-      }
-    );
+    const response = await fetch("https://tnxdhrjfpmrvajvlejjv.supabase.co/functions/v1/external-signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        Authorization: `Bearer ${anonKey}`, // ADD THIS - Required by Supabase
+        apikey: anonKey, // ADD THIS - Also required
+      },
+      body: JSON.stringify({ name, email, plan }),
+    });
 
     const data = await response.json();
     console.log(`External signup response for ${email}:`, data);
@@ -84,10 +94,10 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error in external-signup function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 };
 
