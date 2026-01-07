@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-key",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface ExternalSignupRequest {
@@ -53,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const apiKey = Deno.env.get("EXTERNAL_SIGNUP_API_KEY");
-    const anonKey = Deno.env.get("ADORCH_SUPABASE_ANON_KEY");
+    const anonKey = Deno.env.get("ADORCH_SUPABASE_ANON_KEY"); // CHANGED: Use ADORCH_SUPABASE_ANON_KEY
 
     if (!apiKey) {
       console.error("EXTERNAL_SIGNUP_API_KEY is not configured");
@@ -64,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!anonKey) {
-      console.error("ADORCH_SUPABASE_ANON_KEY is not configured");
+      console.error("ADORCH_SUPABASE_ANON_KEY is not configured"); // CHANGED: Error message
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -72,15 +72,15 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`Calling external signup API for: ${email}`);
-    console.log(`Using anon key: ${anonKey.substring(0, 20)}...`); // Debug log
+    console.log(`Using anon key: ${anonKey.substring(0, 20)}...`); // ADD: Debug log
 
     const response = await fetch("https://tnxdhrjfpmrvajvlejjv.supabase.co/functions/v1/external-signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: anonKey, // CRITICAL: Must be first
-        Authorization: `Bearer ${anonKey}`, // CRITICAL: Must be second
-        "x-api-key": apiKey, // Your custom API key
+        apikey: anonKey, // IMPORTANT: Order matters - apikey first
+        Authorization: `Bearer ${anonKey}`, // Then Authorization
+        "x-api-key": apiKey, // Then your custom key
       },
       body: JSON.stringify({ name, email, plan }),
     });
