@@ -8,6 +8,7 @@ const corsHeaders = {
 interface ExternalSignupRequest {
   name: string;
   email: string;
+  inviteCode: string;
   plan?: "free" | "tier_1" | "tier_2" | "tier_3" | "enterprise";
 }
 
@@ -17,12 +18,37 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, plan = "free" }: ExternalSignupRequest = await req.json();
+    const { name, email, inviteCode, plan = "free" }: ExternalSignupRequest = await req.json();
 
     if (!name || !email) {
       return new Response(
         JSON.stringify({ error: "Name and email are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!inviteCode) {
+      return new Response(
+        JSON.stringify({ error: "Invite code is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify invite code
+    const betaInviteCode = Deno.env.get("BETA_INVITE_CODE");
+    if (!betaInviteCode) {
+      console.error("BETA_INVITE_CODE is not configured");
+      return new Response(
+        JSON.stringify({ error: "Server configuration error" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (inviteCode.trim() !== betaInviteCode.trim()) {
+      console.log(`Invalid invite code attempt for: ${email}`);
+      return new Response(
+        JSON.stringify({ error: "Invalid invite code" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

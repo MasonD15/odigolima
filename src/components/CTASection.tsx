@@ -10,6 +10,7 @@ import { useUtmParams } from "@/hooks/useUtmParams";
 export const CTASection = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const utmParams = useUtmParams();
 
@@ -17,6 +18,7 @@ export const CTASection = () => {
     e.preventDefault();
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
+    const trimmedInviteCode = inviteCode.trim();
     
     if (!trimmedName) {
       toast.error("Please enter your name");
@@ -34,9 +36,43 @@ export const CTASection = () => {
       return;
     }
 
+    if (!trimmedInviteCode) {
+      toast.error("Please enter your invite code");
+      return;
+    }
+
     setIsSubmitting(true);
+
+    // Call external signup API with invite code verification
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("external-signup", {
+        body: { name: trimmedName, email: trimmedEmail, inviteCode: trimmedInviteCode, plan: "free" },
+      });
+      
+      if (fnError) {
+        console.error("External signup error:", fnError);
+        toast.error("Something went wrong. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data?.error) {
+        if (data.error === "Invalid invite code") {
+          toast.error("Invalid invite code. Please check and try again.");
+        } else {
+          toast.error(data.error);
+        }
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (err) {
+      console.error("Failed to call external signup:", err);
+      toast.error("Something went wrong. Please try again.");
+      setIsSubmitting(false);
+      return;
+    }
     
-    // Save to local waitlist
+    // Save to local waitlist after successful invite code verification
     const { error } = await supabase.from("waitlist_signups").insert({
       email: trimmedEmail,
       referral_url: utmParams.referralUrl,
@@ -57,22 +93,11 @@ export const CTASection = () => {
       return;
     }
 
-    // Call external signup API
-    try {
-      const { error: fnError } = await supabase.functions.invoke("external-signup", {
-        body: { name: trimmedName, email: trimmedEmail, plan: "free" },
-      });
-      if (fnError) {
-        console.error("External signup error:", fnError);
-      }
-    } catch (err) {
-      console.error("Failed to call external signup:", err);
-    }
-
     setIsSubmitting(false);
-    toast.success("You're on the list! We'll notify you when we launch.");
+    toast.success("You're in! Check your email for next steps.");
     setName("");
     setEmail("");
+    setInviteCode("");
   };
 
   return (
@@ -128,6 +153,13 @@ export const CTASection = () => {
                 className="h-12 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
               />
             </div>
+            <Input
+              type="text"
+              placeholder="Invite code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              className="h-12 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
+            />
             <Button
               type="submit"
               variant="hero"
