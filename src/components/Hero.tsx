@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ArrowRight, Sparkles, Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,14 +13,14 @@ export const Hero = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [inviteCode, setInviteCode] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const utmParams = useUtmParams();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
-    const trimmedInviteCode = inviteCode.trim();
     
     if (!trimmedName) {
       toast.error("Please enter your name");
@@ -36,6 +37,14 @@ export const Hero = () => {
       toast.error("Please enter a valid email address");
       return;
     }
+
+    setIsDialogOpen(true);
+  };
+
+  const handleInviteCodeSubmit = async () => {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedInviteCode = inviteCode.trim();
 
     if (!trimmedInviteCode) {
       toast.error("Please enter your invite code");
@@ -95,6 +104,7 @@ export const Hero = () => {
     }
 
     setIsSubmitting(false);
+    setIsDialogOpen(false);
     toast.success("You're in! Check your email for next steps.");
     setName("");
     setEmail("");
@@ -152,7 +162,7 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            onSubmit={handleSubmit}
+            onSubmit={handleInitialSubmit}
             className="flex flex-col gap-3 max-w-md mx-auto mb-6"
           >
             <div className="flex flex-col sm:flex-row gap-3">
@@ -171,28 +181,14 @@ export const Hero = () => {
                 className="h-12 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
               />
             </div>
-            <Input
-              type="text"
-              placeholder="Invite code"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value)}
-              className="h-12 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
-            />
             <Button
               type="submit"
               variant="hero"
               size="lg"
-              disabled={isSubmitting}
               className="w-full sm:w-auto sm:mx-auto sm:min-w-[200px]"
             >
-              {isSubmitting ? (
-                "Signing up..."
-              ) : (
-                <>
-                  Get Free Beta Access
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              Get Free Beta Access
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </motion.form>
 
@@ -237,6 +233,35 @@ export const Hero = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Invite Code Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter Your Invite Code</DialogTitle>
+            <DialogDescription>
+              Please enter your invite code to complete your free beta signup.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <Input
+              type="text"
+              placeholder="Invite code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              className="h-12"
+            />
+            <Button
+              onClick={handleInviteCodeSubmit}
+              variant="hero"
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? "Verifying..." : "Submit"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
