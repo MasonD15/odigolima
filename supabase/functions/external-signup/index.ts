@@ -53,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const apiKey = Deno.env.get("EXTERNAL_SIGNUP_API_KEY");
-    const anonKey = Deno.env.get("ADORCH_SUPABASE_ANON_KEY"); // CHANGED: Use ADORCH_SUPABASE_ANON_KEY
+    const anonKey = Deno.env.get("ADORCH_SUPABASE_ANON_KE"); // ADD THIS
 
     if (!apiKey) {
       console.error("EXTERNAL_SIGNUP_API_KEY is not configured");
@@ -64,7 +64,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!anonKey) {
-      console.error("ADORCH_SUPABASE_ANON_KEY is not configured"); // CHANGED: Error message
+      // ADD THIS
+      console.error("SUPABASE_ANON_KEY is not configured");
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -72,15 +73,14 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`Calling external signup API for: ${email}`);
-    console.log(`Using anon key: ${anonKey.substring(0, 20)}...`); // ADD: Debug log
 
     const response = await fetch("https://tnxdhrjfpmrvajvlejjv.supabase.co/functions/v1/external-signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: anonKey, // IMPORTANT: Order matters - apikey first
-        Authorization: `Bearer ${anonKey}`, // Then Authorization
-        "x-api-key": apiKey, // Then your custom key
+        "x-api-key": apiKey,
+        Authorization: `Bearer ${anonKey}`, // ADD THIS - Required by Supabase
+        apikey: anonKey, // ADD THIS - Also required
       },
       body: JSON.stringify({ name, email, plan }),
     });
