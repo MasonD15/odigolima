@@ -154,10 +154,10 @@ export const Hero = () => {
               className="w-full sm:w-auto sm:mx-auto sm:min-w-[200px]"
             >
               {isSubmitting ? (
-                "Joining..."
+                "Signing up..."
               ) : (
                 <>
-                  Join Waitlist
+                  Get Free Beta Access
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
