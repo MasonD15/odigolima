@@ -8,13 +8,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUtmParams } from "@/hooks/useUtmParams";
 
 export const CTASection = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const utmParams = useUtmParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
+    
+    if (!trimmedName) {
+      toast.error("Please enter your name");
+      return;
+    }
     
     if (!trimmedEmail) {
       toast.error("Please enter your email address");
@@ -29,6 +36,7 @@ export const CTASection = () => {
 
     setIsSubmitting(true);
     
+    // Save to local waitlist
     const { error } = await supabase.from("waitlist_signups").insert({
       email: trimmedEmail,
       referral_url: utmParams.referralUrl,
@@ -39,9 +47,8 @@ export const CTASection = () => {
       utm_content: utmParams.utmContent,
     });
 
-    setIsSubmitting(false);
-
     if (error) {
+      setIsSubmitting(false);
       if (error.code === "23505") {
         toast.error("This email is already on the waitlist!");
       } else {
@@ -50,7 +57,21 @@ export const CTASection = () => {
       return;
     }
 
+    // Call external signup API
+    try {
+      const { error: fnError } = await supabase.functions.invoke("external-signup", {
+        body: { name: trimmedName, email: trimmedEmail, plan: "free" },
+      });
+      if (fnError) {
+        console.error("External signup error:", fnError);
+      }
+    } catch (err) {
+      console.error("Failed to call external signup:", err);
+    }
+
+    setIsSubmitting(false);
     toast.success("You're on the list! We'll notify you when we launch.");
+    setName("");
     setEmail("");
   };
 
@@ -89,21 +110,30 @@ export const CTASection = () => {
           {/* Form */}
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-8"
+            className="flex flex-col gap-3 max-w-md mx-auto mb-8"
           >
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
-            />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Input
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-12 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
+              />
+              <Input
+                type="email"
+                placeholder="Your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-12 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary"
+              />
+            </div>
             <Button
               type="submit"
               variant="hero"
               size="lg"
               disabled={isSubmitting}
-              className="min-w-[160px]"
+              className="w-full"
             >
               {isSubmitting ? (
                 "Joining..."
