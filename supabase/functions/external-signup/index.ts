@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-key",
 };
 
 interface ExternalSignupRequest {
@@ -72,14 +72,15 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`Calling external signup API for: ${email}`);
+    console.log(`Using anon key: ${anonKey.substring(0, 20)}...`); // Debug log
 
     const response = await fetch("https://tnxdhrjfpmrvajvlejjv.supabase.co/functions/v1/external-signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        Authorization: `Bearer ${anonKey}`,
-        apikey: anonKey,
+        apikey: anonKey, // CRITICAL: Must be first
+        Authorization: `Bearer ${anonKey}`, // CRITICAL: Must be second
+        "x-api-key": apiKey, // Your custom API key
       },
       body: JSON.stringify({ name, email, plan }),
     });
