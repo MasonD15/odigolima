@@ -1,1 +1,4 @@
-project_id = "mmjoucpdftjvpdmiamfo"
+project_id = "zofebhqzquodzqkiytxx"
+
+[functions.external-signup]
+verify_jwt = false
