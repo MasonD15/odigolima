@@ -15,6 +15,7 @@ export const Hero = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const utmParams = useUtmParams();
 
   const handleInitialSubmit = (e: React.FormEvent) => {
@@ -105,11 +106,63 @@ export const Hero = () => {
 
     setIsSubmitting(false);
     setIsDialogOpen(false);
-    toast.success("You're in! Check your email for next steps.");
+    setIsSuccess(true);
     setName("");
     setEmail("");
     setInviteCode("");
   };
+
+  // Success state - Thank you message
+  if (isSuccess) {
+    return (
+      <section className="relative min-h-screen flex items-center justify-center pt-20 pb-16 overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(140_25%_12%)_0%,_hsl(140_30%_5%)_70%)]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/10 rounded-full blur-[120px] opacity-50" />
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+
+        <div className="container relative z-10 mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-2xl mx-auto text-center"
+          >
+            {/* Success Icon */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-8"
+            >
+              <Check className="w-10 h-10 text-primary" />
+            </motion.div>
+
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-6">
+              Thank You!
+            </h1>
+            
+            <p className="text-xl text-muted-foreground mb-4">
+              You're on the list! 🎉
+            </p>
+            
+            <p className="text-lg text-muted-foreground max-w-md mx-auto mb-8">
+              Check your email for a confirmation and next steps. We'll notify you when it's your turn to access the beta.
+            </p>
+
+            <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="text-muted-foreground">
+                Early access coming Q1 2026
+              </span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 pb-16 overflow-hidden">

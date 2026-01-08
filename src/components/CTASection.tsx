@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ArrowRight, Zap, Shield, Clock } from "lucide-react";
+import { ArrowRight, Zap, Shield, Clock, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useUtmParams } from "@/hooks/useUtmParams";
@@ -14,6 +14,7 @@ export const CTASection = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const utmParams = useUtmParams();
 
   const handleInitialSubmit = (e: React.FormEvent) => {
@@ -104,11 +105,56 @@ export const CTASection = () => {
 
     setIsSubmitting(false);
     setIsDialogOpen(false);
-    toast.success("You're in! Check your email for next steps.");
+    setIsSuccess(true);
     setName("");
     setEmail("");
     setInviteCode("");
   };
+
+  // Success state - Thank you message
+  if (isSuccess) {
+    return (
+      <section className="py-24 relative overflow-hidden" id="cta">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/30 to-background" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[100px]" />
+
+        <div className="container relative z-10 mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-2xl mx-auto text-center"
+          >
+            {/* Success Icon */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mb-6"
+            >
+              <Check className="w-8 h-8 text-primary" />
+            </motion.div>
+
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+              Thank You!
+            </h2>
+            
+            <p className="text-lg text-muted-foreground mb-6">
+              You're on the list! Check your email for confirmation and next steps.
+            </p>
+
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm text-muted-foreground">
+                Early access coming Q1 2026
+              </span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-24 relative overflow-hidden" id="cta">
