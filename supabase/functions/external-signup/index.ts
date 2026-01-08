@@ -53,7 +53,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const apiKey = Deno.env.get("EXTERNAL_SIGNUP_API_KEY");
-    const anonKey = Deno.env.get("ADORCH_SUPABASE_ANON_KE"); // ADD THIS
+    const anonKey = Deno.env.get("ADORCH_SUPABASE_ANON_KEY");
 
     if (!apiKey) {
       console.error("EXTERNAL_SIGNUP_API_KEY is not configured");
@@ -64,8 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     if (!anonKey) {
-      // ADD THIS
-      console.error("SUPABASE_ANON_KEY is not configured");
+      console.error("ADORCH_SUPABASE_ANON_KEY is not configured");
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -78,9 +77,9 @@ const handler = async (req: Request): Promise<Response> => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "apikey": anonKey,
+        "Authorization": `Bearer ${anonKey}`,
         "x-api-key": apiKey,
-        Authorization: `Bearer ${anonKey}`, // ADD THIS - Required by Supabase
-        apikey: anonKey, // ADD THIS - Also required
       },
       body: JSON.stringify({ name, email, plan }),
     });
