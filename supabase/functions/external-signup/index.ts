@@ -72,6 +72,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log(`Calling external signup API for: ${email}`);
+    console.log(`API Key present: ${!!apiKey}`);
+    console.log(`Anon Key present: ${!!anonKey}`);
+    console.log(`Anon Key length: ${anonKey?.length || 0}`);
 
     const response = await fetch("https://tnxdhrjfpmrvajvlejjv.supabase.co/functions/v1/external-signup", {
       method: "POST",
